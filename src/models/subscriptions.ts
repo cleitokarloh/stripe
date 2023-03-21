@@ -38,7 +38,7 @@ const subscriptionSchema = new dynamoose.Schema({
         timestamps: true,
     });
 
-    class  SubscriptionModel  extends Item{
+    class  SubscriptionModel extends Item {
         subscription_id: string;
         gateway: string;
         object: string;

@@ -21,9 +21,10 @@ interface HomeProps {
     image: string;    
   }[]
   asPermissionsForMainnet: boolean;
+  subscription: typeof Subscription;
 }
 
-export default function Home({ products, asPermissionsForMainnet }:HomeProps) {
+export default function ChangePlan({ products, asPermissionsForMainnet, subscription }:HomeProps) {
   
   const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false);
 
@@ -69,28 +70,17 @@ export default function Home({ products, asPermissionsForMainnet }:HomeProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+      
+        <Heading variant='big-title'>Change your plan</Heading>
 
-        {asPermissionsForMainnet && (
-          <>
-            <Heading variant='big-title' color={'primaryColor500'}>User Can Deploy on Mainnet.</Heading>
-
-            <Button onClick={handleCancelSubscription}>Cancel subscription</Button>
-          </>          
-        )}
-
-        {!asPermissionsForMainnet && (
-            <>
-                <Heading variant='big-title'>Select a plan</Heading>
-
-                {products.map(product => (
-                  <button disabled={isCreatingCheckoutSession} key={product.id} onClick={() => handleCreateCheckoutSession(product.priceId)} className={styles.item}>
-                      <Text>{product.name}</Text>
-                      <Text>{product.price}</Text>
-                  </button>
-                ))}
-
-            </>)        
-        }
+        {products.map(product => (
+          <button disabled={isCreatingCheckoutSession} key={product.id} onClick={() => handleCreateCheckoutSession(product.priceId)} className={styles.item}>
+              <Text>{product.name}</Text>
+              if()
+              <Text>selected</Text>
+              <Text>{product.price}</Text>
+          </button>
+        ))}        
 
       </main>
     </>
@@ -120,15 +110,16 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   })
 
-  console.log(products)
-
   const subscription = await userHasActiveSubscription('0x0000000')
 
   return {
     props: {
       products: products.reverse(),
       asPermissionsForMainnet: subscription.length > 0 ? true : false,
+      subscription: JSON.stringify(subscription[0]),
     },
     // revalidate: 60 * 60 * 2, // 2 hours
   }
 }
+
+// Todo: add planId in subscription model.

@@ -1,4 +1,5 @@
-import { Subscription } from "@/models/subscriptions";
+import { stripe } from "@/lib/stripe";
+
 import { GetServerSideProps } from "next";
 
 export default function Test() {
@@ -10,27 +11,20 @@ export default function Test() {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const id =  Math.random().toString();
-    const sub = await Subscription.create({
-      gateway: 'stripe',
-      subscription_id:id,
-      period_start: 11111,
-      period_end: 11112,
-      status: 'active',
-      object: '{}',
-      wallet: '0x123',
-    });
   
-
-    await Subscription.update(
-       id,
-      {
-        status: 'canceled',
-        period_end: 333333
-     });
-
-
-    console.log(sub);
+  // const subscription = await stripe.subscriptions.update('sub_1Mo6JmBeDkJ4UWAX2BgJKgYc', {
+  //   items: [
+  //     {
+  //       id: 'si_NZKn7hWvllzknr',
+  //       deleted: true
+  //     },
+  //     {
+  //       price:'price_1Mme9lBeDkJ4UWAXGhakPx3X',
+  //       quantity: 1,
+  //     }
+  //   ]
+  // })
+    console.log(subscription);
     return {
       props: {
         products: [],

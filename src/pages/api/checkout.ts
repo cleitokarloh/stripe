@@ -14,12 +14,12 @@ export default async function handler(
   const priceId = req.body.priceId;
 
   if(!priceId) return res.status(400).json({ error: 'Price not found.' })
+  
 
   const checkoutSession = await stripe.checkout.sessions.create({
     success_url: successUrl,
     cancel_url: cancelUrl,
     mode: 'subscription',
-    payment_method_types: ['card'],
     client_reference_id: '1234',
     
     metadata: {
