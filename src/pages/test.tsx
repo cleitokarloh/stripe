@@ -11,20 +11,15 @@ export default function Test() {
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  
-  // const subscription = await stripe.subscriptions.update('sub_1Mo6JmBeDkJ4UWAX2BgJKgYc', {
-  //   items: [
-  //     {
-  //       id: 'si_NZKn7hWvllzknr',
-  //       deleted: true
-  //     },
-  //     {
-  //       price:'price_1Mme9lBeDkJ4UWAXGhakPx3X',
-  //       quantity: 1,
-  //     }
-  //   ]
-  // })
-    console.log(subscription);
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: 'cus_NZi9r0X9Qrg4xsxsxsxYJ',
+    return_url: 'https://example.com/account',
+    locale: 'pt-BR',
+  });
+  console.log(session);  
+  // const subscription = await stripe.subscriptions.update('sub_1MoYjNBeDkJ4UWAXLmwhGPgP')
+  // console.log(subscription);
     return {
       props: {
         products: [],

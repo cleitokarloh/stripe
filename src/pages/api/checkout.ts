@@ -11,7 +11,7 @@ export default async function handler(
   const successUrl = `${process.env.NEXT_URL}/response/success`;
   const cancelUrl = `${process.env.NEXT_URL}/response/cancel`;
 
-  const priceId = req.body.priceId;
+  const {priceId, locale } = req.body;
 
   if(!priceId) return res.status(400).json({ error: 'Price not found.' })
   
@@ -21,6 +21,7 @@ export default async function handler(
     cancel_url: cancelUrl,
     mode: 'subscription',
     client_reference_id: '1234',
+    locale,
     
     metadata: {
       wallet: '0x0000000',
