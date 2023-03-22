@@ -36,7 +36,7 @@ export default function ChangePlan({ products, asPermissionsForMainnet, subscrip
 
   async function handleChangePlan(priceId: number) {
     setIsChangePlan(true);
-    fetch('/api/change-plan', {
+    fetch('/api/plan-change', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
