@@ -12,6 +12,8 @@ export const config = {
 
   interface SubscriptionProps {
     subscription_id: string;
+    plan_id: string;
+    plan_item_id: string;
     gateway: string;
     object: string;
     period_start: number;
@@ -53,10 +55,15 @@ export default async function handler(
     case 'checkout.session.completed':
      
       const session = event.data.object;
-      const stripeSubscription = await stripe.subscriptions.retrieve(session.subscription);
+      const stripeSubscription = await stripe.subscriptions.retrieve(session.subscription); 
+
+      const planId = stripeSubscription.plan.id;
+      const planItemId = stripeSubscription.items.data[0].id;
 
       const subscriptionToCreate: SubscriptionProps = {
         subscription_id: stripeSubscription.id,
+        plan_id: planId,
+        plan_item_id: planItemId,
         gateway: 'stripe',
         object: JSON.stringify(stripeSubscription),
         period_start: stripeSubscription.current_period_start,
@@ -81,11 +88,15 @@ export default async function handler(
       break;
     case 'customer.subscription.updated':
         subscription = event.data.object;
+
+        
         
         handleSubscriptionUpdated({
           id:subscription.id,
           status: subscription.status,
-          period_end: subscription.current_period_end
+          period_end: subscription.current_period_end,
+          plan_id: subscription.plan.id,
+          plan_item_id: subscription.items.data[0].id
         }); 
         break;
     default:
@@ -106,28 +117,42 @@ export default async function handler(
     }
   }
   
-  interface SubscriptionUpdated {
+  interface SubscriptionDeleted {
     id: string;
     status: string;
     period_end: string;
   }
-  const handleSubscriptionDeleted = async (subscription: SubscriptionUpdated) => {
+  const handleSubscriptionDeleted = async (subscription: SubscriptionDeleted) => {
    const { id, status, period_end } = subscription;
    
    try{
-    await Subscription.update(id, { status, period_end: Number(period_end) });
+    const existsSubscription = await Subscription.get(id);
+
+    if(existsSubscription) {
+      await Subscription.update(id, { status, period_end: Number(period_end) });
+    }
    } catch(e: any) {
     console.log('handleSubscriptionDeleted. Error: ', e.message);
    }
   }
 
-
+  interface SubscriptionUpdated {
+    id: string;
+    status: string;
+    period_end: string;
+    plan_id: string;
+    plan_item_id: string;
+  }
   const handleSubscriptionUpdated = async (subscription:SubscriptionUpdated) => {
 
-    const { id, status, period_end } = subscription;
+    const { id, status, period_end, plan_id, plan_item_id } = subscription;
    
     try{
-      await Subscription.update(id, { status, period_end: Number(period_end) });
+      const existsSubscription = await Subscription.get(id);
+
+      if(existsSubscription) {
+        await Subscription.update(id, { status, period_end: Number(period_end), plan_id, plan_item_id });
+      }
     } catch(e: any) {
       console.log('handleSubscriptionDeleted. Error: ', e.message);
     }

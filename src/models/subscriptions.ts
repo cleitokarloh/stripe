@@ -6,6 +6,14 @@ const subscriptionSchema = new dynamoose.Schema({
         type: String,
         hashKey: true,
     },
+    plan_id: {
+        type: String,
+        required: true,
+    },
+    plan_item_id: {
+        type: String,
+        required: true,
+    },
     gateway: {
         type: String,
         required: true,
@@ -40,6 +48,8 @@ const subscriptionSchema = new dynamoose.Schema({
 
     class  SubscriptionModel extends Item {
         subscription_id: string;
+        plan_id: string;
+        plan_item_id: string;
         gateway: string;
         object: string;
         period_start: number;

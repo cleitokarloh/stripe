@@ -21,46 +21,42 @@ interface HomeProps {
     image: string;    
   }[]
   asPermissionsForMainnet: boolean;
-  subscription: typeof Subscription;
+  subscription: string;
 }
+
+type SubscriptionProps = typeof Subscription;
 
 export default function ChangePlan({ products, asPermissionsForMainnet, subscription }:HomeProps) {
   
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false);
+  const [isChangePlan, setIsChangePlan] = useState(false);
 
-  async function handleCreateCheckoutSession(priceId: string) {
-    setIsCreatingCheckoutSession(true);
-    fetch('/api/checkout', {
+  if(subscription.length === 0) return (<div>Not found</div>)
+
+  const currentSubscription: SubscriptionProps = JSON.parse(subscription);
+
+  async function handleChangePlan(priceId: number) {
+    setIsChangePlan(true);
+    fetch('/api/change-plan', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        currentPlanId: currentSubscription.plan_item_id,
         priceId,
+        subscriptionId: currentSubscription.subscription_id
       })
-    }).then(res => res.json())
-    .then(data => {
-      window.location.href = data.checkoutUrl;
+    }).then(res => {
+      alert('Plan changed successfully');
+      window.location.reload()
     })
     .catch(err => {
-      setIsCreatingCheckoutSession(false) 
+      setIsChangePlan(false) 
+      console.log(err)
       alert('Error: ' + err)
     });
   }
 
-  const handleCancelSubscription = async () => {
-    await fetch('/api/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          wallet: '0x0000000',
-        })
-    })
-
-   window.location.reload();
-  }
   return (
     <>
       <Head>
@@ -70,24 +66,35 @@ export default function ChangePlan({ products, asPermissionsForMainnet, subscrip
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-      
+      <>
         <Heading variant='big-title'>Change your plan</Heading>
-
-        {products.map(product => (
-          <button disabled={isCreatingCheckoutSession} key={product.id} onClick={() => handleCreateCheckoutSession(product.priceId)} className={styles.item}>
-              <Text>{product.name}</Text>
-              if()
-              <Text>selected</Text>
-              <Text>{product.price}</Text>
-          </button>
-        ))}        
-
+        {products.map(product => 
+        
+          <>
+         {product.priceId.toString() === currentSubscription.plan_id ? 
+            (<button disabled key={product.id} className={styles.item}>
+                <Text>{product.name}</Text>
+                <Text>Current Plan</Text>
+                <Text>{product.price}</Text>
+            </button>)
+            : 
+            (<button disabled={isChangePlan} key={product.id} onClick={() => handleChangePlan(product.priceId)} className={styles.item}>
+                <Text>{product.name}</Text>
+                <Text>{product.price}</Text>
+            </button>)
+          }
+          </>
+        
+      
+        )}        
+      </>
       </main>
     </>
   )
 }
 
 export const getStaticProps: GetStaticProps = async () => {
+
     const response = await stripe.products.list({
       expand: ['data.default_price'],
       active: true,
@@ -116,7 +123,7 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       products: products.reverse(),
       asPermissionsForMainnet: subscription.length > 0 ? true : false,
-      subscription: JSON.stringify(subscription[0]),
+      subscription: JSON.stringify(subscription[0]?? []),
     },
     // revalidate: 60 * 60 * 2, // 2 hours
   }

@@ -24,11 +24,11 @@ export default async function handler(
     try {
         await stripe.subscriptions.cancel(subscriptionId)
     }catch(e:any) {
-        res.status(400).json({ error: e.message })
+        return res.status(400).json({ error: e.message })
         return
     }
 
     
 
-    res.status(200).json('Subscription canceled!')
+    return res.status(200).json('Subscription canceled!')
   }
