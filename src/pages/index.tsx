@@ -36,6 +36,7 @@ export default function Home({ products, asPermissionsForMainnet }:HomeProps) {
       },
       body: JSON.stringify({
         priceId,
+        locale: 'pt-BR',
       })
     }).then(res => res.json())
     .then(data => {
@@ -60,6 +61,22 @@ export default function Home({ products, asPermissionsForMainnet }:HomeProps) {
 
    window.location.reload();
   }
+
+  const handleManageSubscription = async () => {
+    await fetch('/api/get-billing-portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          customerId: 'cus_NZi9r0X9Qrg4YJ',
+          locale: 'pt-BR',
+        })
+    }).then(res => res.json())
+    .then(data => {
+      window.location.href = data.url;
+    })
+  }
   return (
     <>
       <Head>
@@ -75,6 +92,7 @@ export default function Home({ products, asPermissionsForMainnet }:HomeProps) {
             <Heading variant='big-title' color={'primaryColor500'}>User Can Deploy on Mainnet.</Heading>
 
             <Button onClick={handleCancelSubscription}>Cancel subscription</Button>
+            <Button onClick={handleManageSubscription}>Manage subscription</Button>
           </>          
         )}
 
